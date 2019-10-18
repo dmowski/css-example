@@ -1,0 +1,6 @@
+.idea
+.vscode
+node_modules
+.npmrc
+.DS_Store
+package-lock.json
