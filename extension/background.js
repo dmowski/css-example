@@ -31,8 +31,18 @@ function updateStyleForDocument(document) {
  * @param {Object} window
  * @return {Array.HTMLElement} iframeList: [<iframe >]
  */
-function getIframesRecursive(window) {
-  return [...document.querySelectorAll("iframe")];
+function getIframesRecursive(win) {
+  let iframes = [...win.document.querySelectorAll("iframe")];
+  iframes = iframes.filter(checkCorrectIframeDocument);
+
+  let allChildIframes = [];
+  iframes.forEach(iframe => {
+    const childIframeWindow = getWindowFromIframe(iframe);
+    const childIframesRecursive = getIframesRecursive(childIframeWindow);
+    allChildIframes = [...allChildIframes, ...childIframesRecursive];
+  });
+
+  return [...allChildIframes, ...iframes];
 }
 
 /**
@@ -40,7 +50,8 @@ function getIframesRecursive(window) {
  * @return {Boolean} true if document correct for work
  */
 function checkCorrectIframeDocument(iframeNodeElement) {
-  return iframeNodeElement.contentDocument.readyState === "complete";
+  const doc = getDocumentFromIframe(iframeNodeElement);
+  return doc && doc.readyState === "complete";
 }
 
 /**
@@ -49,6 +60,14 @@ function checkCorrectIframeDocument(iframeNodeElement) {
  */
 function getDocumentFromIframe(iframeNodeElement) {
   return iframeNodeElement.contentDocument;
+}
+
+/**
+ * @param {HTMLElement} iframeNodeElement
+ * @return {Object} window from iframe
+ */
+function getWindowFromIframe(iframeNodeElement) {
+  return iframeNodeElement.contentWindow;
 }
 
 /**
