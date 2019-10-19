@@ -3,11 +3,15 @@ const express = require("express");
 const port = process.env.PORT || 8045;
 const open = require("open");
 
+const chromium = require("chromium");
+const { execFile } = require("child_process");
 const app = express();
+const path = require("path");
+const staticFolderPath = path.join(__dirname, "client");
 
 app.use(bodyParser.json({ type: "application/json" }));
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.static("client"));
+app.use(express.static(staticFolderPath));
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
@@ -21,7 +25,15 @@ app.use(function(req, res, next) {
   next();
 });
 
+function runChrome(url) {
+  execFile(chromium.path, [url], err => {
+    console.log("Google Chrome closed");
+    runChrome(url);
+  });
+}
+
 app.listen(port, function() {
-  console.log(`Example app listening on port ${port}!`);
-  open(`http://localhost:${port}/`);
+  const url = `http://localhost:${port}/`;
+  console.log(`App: ${url}`);
+  runChrome(url);
 });
