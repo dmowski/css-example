@@ -20,6 +20,14 @@ function getLinkNodeListFromDocument(document) {
 }
 
 /**
+ * @param {Object} window HTMLdocument
+ * @return {Array.HTMLElement} NodeList: [<iframe >]
+ */
+function getIframeNodeListFromDocument(win) {
+  return [...win.document.querySelectorAll("iframe")];
+}
+
+/**
  * @param {HTMLElement} document HTMLdocument
  */
 function updateStyleForDocument(document) {
@@ -32,7 +40,7 @@ function updateStyleForDocument(document) {
  * @return {Array.HTMLElement} iframeList: [<iframe >]
  */
 function getIframesRecursive(win) {
-  let iframes = [...win.document.querySelectorAll("iframe")];
+  let iframes = getIframeNodeListFromDocument(win);
   iframes = iframes.filter(checkCorrectIframeDocument);
 
   let allChildIframes = [];
