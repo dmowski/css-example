@@ -1,7 +1,6 @@
 const bodyParser = require("body-parser");
 const express = require("express");
 const port = process.env.PORT || 8045;
-const open = require("open");
 
 const chromium = require("chromium");
 const { execFile } = require("child_process");
@@ -26,7 +25,12 @@ app.use(function(req, res, next) {
 });
 
 function runChrome(url) {
-  execFile(chromium.path, [url, "--auto-open-devtools-for-tabs"], err => {
+  const chromiumArgs = [
+    url,
+    "--disable-infobars",
+    "--auto-open-devtools-for-tabs",
+  ];
+  execFile(chromium.path, chromiumArgs, err => {
     console.log("Google Chrome closed");
     runChrome(url);
   });
