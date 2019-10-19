@@ -12,11 +12,25 @@ function setNewUrlToLinkNode(linkDOMnode) {
 }
 
 /**
+ * @param {HTMLElement} linkDOMnode
+ * @param {HTMLElement} document HTMLdocument
+ */
+function setNewUrlToStyleNode(linkDOMnode) {}
+
+/**
  * @param {HTMLElement} document HTMLdocument
  * @return {Array.HTMLElement} NodeList: [<link rel="stylesheet" href="css/main.css">]
  */
 function getLinkNodeListFromDocument(document) {
   return [...document.querySelectorAll("link[rel=stylesheet]")];
+}
+
+/**
+ * @param {HTMLElement} document HTMLdocument
+ * @return {Array.HTMLElement} NodeList: [<style >]
+ */
+function getStyleNodeListFromDocument(document) {
+  return [...document.querySelectorAll("style")];
 }
 
 /**
@@ -33,6 +47,9 @@ function getIframeNodeListFromDocument(win) {
 function updateStyleForDocument(document) {
   const linkList = getLinkNodeListFromDocument(document);
   linkList.forEach(setNewUrlToLinkNode);
+
+  const styleNodeList = getStyleNodeListFromDocument(document);
+  styleNodeList.forEach(setNewUrlToStyleNode);
 }
 
 /**
