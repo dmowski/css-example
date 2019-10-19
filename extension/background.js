@@ -5,7 +5,7 @@
 function setNewUrlToLinkNode(linkDOMnode) {
   const searchHashPreffix = "cssReloadHash";
   const oldUrl = linkDOMnode.getAttribute("href");
-  const baseUrl = linkDOMnode.ownerDocument.location.toString();
+  const baseUrl = linkDOMnode.ownerDocument.baseURI;
   var newUrl = new URL(oldUrl, baseUrl);
   newUrl.searchParams.set(searchHashPreffix, Date.now());
   linkDOMnode.setAttribute("href", newUrl);
