@@ -26,7 +26,7 @@ app.use(function(req, res, next) {
 });
 
 function runChrome(url) {
-  execFile(chromium.path, [url], err => {
+  execFile(chromium.path, [url, "--auto-open-devtools-for-tabs"], err => {
     console.log("Google Chrome closed");
     runChrome(url);
   });
