@@ -1,21 +1,21 @@
-/*
-let xhr = new XMLHttpRequest();
-xhr.open("GET", window.location + "?as=" + Date.now());
-xhr.send();
-xhr.onload = function () {
-    console.log(`Loaded: ${xhr.status} ${xhr.response}`);
-};
+(function() {
+  const updateMessage = {
+    update: true,
+  };
 
-xhr.onerror = function () {
-    console.log(`Network Error`);
-};
-
-xhr.onprogress = function (event) {
-    console.log(`Received ${event.loaded} of ${event.total}`);
-};
-*/
-
-chrome.runtime.sendMessage({
-  url: window.location.href,
-  count: 12,
-});
+  window.addEventListener("load", () => {
+    const button = document.getElementById("refreshButton");
+    button.addEventListener("click", () => {
+      console.log("Popup send message", updateMessage);
+      chrome.tabs.query(
+        {
+          active: true,
+          currentWindow: true,
+        },
+        tabs => {
+          chrome.tabs.sendMessage(tabs[0].id, updateMessage);
+        }
+      );
+    });
+  });
+})();
