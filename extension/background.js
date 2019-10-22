@@ -21,10 +21,19 @@ function getUrlWithNewhash(urlString, domNode) {
 }
 
 /**
- * @param {HTMLElement} linkDOMnode
+ * @param {HTMLElement} styleDOMnode
  * @param {HTMLElement} document HTMLdocument
  */
-function setNewUrlToStyleNode(linkDOMnode) {}
+function setNewUrlToStyleNode(styleDOMnode) {
+  const cssString = styleDOMnode.innerHTML;
+  const re = /(?:@import)\s(?:url\()?\s?["\'](.*?)["\']\s?\)?(?:[^;]*);?/gi;
+  let newString = cssString;
+  cssString.replace(re, (match, g1) => {
+    const newUrl = getUrlWithNewhash(g1, styleDOMnode);
+    newString = newString.replace(g1, newUrl);
+  });
+  styleDOMnode.innerHTML = newString;
+}
 
 /**
  * @param {HTMLElement} document HTMLdocument
