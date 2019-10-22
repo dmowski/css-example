@@ -3,12 +3,21 @@
  * @param {HTMLElement} document HTMLdocument
  */
 function setNewUrlToLinkNode(linkDOMnode) {
-  const searchHashPreffix = "cssReloadHash";
   const oldUrl = linkDOMnode.getAttribute("href");
-  const baseUrl = linkDOMnode.ownerDocument.baseURI;
-  var newUrl = new URL(oldUrl, baseUrl);
+  linkDOMnode.setAttribute("href", getUrlWithNewhash(oldUrl, linkDOMnode));
+}
+
+/**
+ * @param {String} urlString
+ * @param {HTMLElement} domNode need for detect document
+ * @return {String} new url with new hash
+ */
+function getUrlWithNewhash(urlString, domNode) {
+  const searchHashPreffix = "cssReloadHash";
+  const baseUrl = domNode.ownerDocument.baseURI;
+  var newUrl = new URL(urlString, baseUrl);
   newUrl.searchParams.set(searchHashPreffix, Date.now());
-  linkDOMnode.setAttribute("href", newUrl);
+  return newUrl;
 }
 
 /**
