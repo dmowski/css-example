@@ -1,10 +1,34 @@
+async function digestMessage(message) {
+  const msgUint8 = new TextEncoder().encode(message); // encode as (utf-8) Uint8Array
+  const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8); // hash the message
+  const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join(""); // convert bytes to hex string
+  return hashHex;
+}
+
+function getFileHash(url) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("HEAD", url, true);
+    xhr.onreadystatechange = async () => {
+      if (xhr.readyState == 4 && xhr.status != 304) {
+        const lastModified = xhr.getResponseHeader("last-modified");
+        const hash = await digestMessage(lastModified);
+        resolve(hash);
+      }
+    };
+    xhr.send();
+  });
+}
+
 /**
  * @param {HTMLElement} linkDOMnode
  * @param {HTMLElement} document HTMLdocument
  */
-function setNewUrlToLinkNode(linkDOMnode) {
+async function setNewUrlToLinkNode(linkDOMnode) {
   const oldUrl = linkDOMnode.getAttribute("href");
-  linkDOMnode.setAttribute("href", getUrlWithNewhash(oldUrl, linkDOMnode));
+  const newUrl = await getUrlWithNewhash(oldUrl, linkDOMnode);
+  linkDOMnode.setAttribute("href", newUrl);
 }
 
 /**
@@ -12,11 +36,12 @@ function setNewUrlToLinkNode(linkDOMnode) {
  * @param {HTMLElement} domNode need for detect document
  * @return {String} new url with new hash
  */
-function getUrlWithNewhash(urlString, domNode) {
+async function getUrlWithNewhash(urlString, domNode) {
   const searchHashPreffix = "cssReloadHash";
   const baseUrl = domNode.ownerDocument.baseURI;
   var newUrl = new URL(urlString, baseUrl);
-  newUrl.searchParams.set(searchHashPreffix, Date.now());
+  const hash = await getFileHash(newUrl);
+  newUrl.searchParams.set(searchHashPreffix, hash);
   return newUrl;
 }
 
@@ -24,14 +49,21 @@ function getUrlWithNewhash(urlString, domNode) {
  * @param {HTMLElement} styleDOMnode
  * @param {HTMLElement} document HTMLdocument
  */
-function setNewUrlToStyleNode(styleDOMnode) {
+async function setNewUrlToStyleNode(styleDOMnode) {
   const cssString = styleDOMnode.innerHTML;
   const re = /(?:@import)\s(?:url\()?\s?["\'](.*?)["\']\s?\)?(?:[^;]*);?/gi;
   let newString = cssString;
+  const updatingLinks = [];
   cssString.replace(re, (match, g1) => {
-    const newUrl = getUrlWithNewhash(g1, styleDOMnode);
-    newString = newString.replace(g1, newUrl);
+    const replacePromise = new Promise(async (resolve, reject) => {
+      const newUrl = await getUrlWithNewhash(g1, styleDOMnode);
+      newString = newString.replace(g1, newUrl);
+      resolve();
+    });
+    updatingLinks.push(replacePromise);
   });
+
+  await Promise.all(updatingLinks);
   styleDOMnode.innerHTML = newString;
 }
 
@@ -62,12 +94,14 @@ function getIframeNodeListFromDocument(win) {
 /**
  * @param {HTMLElement} document HTMLdocument
  */
-function updateStyleForDocument(document) {
+async function updateStyleForDocument(document) {
   const linkList = getLinkNodeListFromDocument(document);
-  linkList.forEach(setNewUrlToLinkNode);
+  const updatingOfLinks = linkList.map(setNewUrlToLinkNode);
 
   const styleNodeList = getStyleNodeListFromDocument(document);
-  styleNodeList.forEach(setNewUrlToStyleNode);
+  const updatingOfStyleTags = styleNodeList.map(setNewUrlToStyleNode);
+
+  await Promise.all([...updatingOfLinks, ...updatingOfStyleTags]);
 }
 
 /**
@@ -129,20 +163,23 @@ function getAllDocumentsFromWindow(window) {
 
 /**
  */
-function refreshStyle() {
+async function refreshStyle() {
   console.log("Start refreshStyle");
 
   const documents = getAllDocumentsFromWindow(window);
-  documents.forEach(updateStyleForDocument);
+  const updatingDocuments = documents.map(updateStyleForDocument);
+  await Promise.all(updatingDocuments);
 }
 
 window.addEventListener("load", () => {
   setTimeout(refreshStyle, 700);
 });
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponce) => {
+chrome.runtime.onMessage.addListener(async (request, sender, sendResponce) => {
   console.log("Background message listener:", request, sender, sendResponce);
   if (request.update) {
-    refreshStyle();
+    console.log("Start Of Updating");
+    await refreshStyle();
+    console.log("End Of Updating");
   }
 });
