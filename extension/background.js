@@ -51,9 +51,12 @@ async function getUrlWithNewhash(urlString, domNode) {
  */
 async function setNewUrlToStyleNode(styleDOMnode) {
   const cssString = styleDOMnode.innerHTML;
+  // TODO: simpilfy regexp
   const re = /(?:@import)\s(?:url\()?\s?["\'](.*?)["\']\s?\)?(?:[^;]*);?/gi;
   let newString = cssString;
   const updatingLinks = [];
+
+  //TODO: check for copy of imports
   cssString.replace(re, (match, g1) => {
     const replacePromise = new Promise(async (resolve, reject) => {
       const newUrl = await getUrlWithNewhash(g1, styleDOMnode);
