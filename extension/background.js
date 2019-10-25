@@ -1,3 +1,5 @@
+const updatingList = {};
+
 async function digestMessage(message) {
   const msgUint8 = new TextEncoder().encode(message); // encode as (utf-8) Uint8Array
   const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8); // hash the message
@@ -9,12 +11,22 @@ async function digestMessage(message) {
 function getFileHash(url) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("HEAD", url, true);
+    const urlWithSalt = new URL(url.toString());
+    urlWithSalt.searchParams.set("saltForGetHash", Date.now());
+    xhr.open("HEAD", urlWithSalt, true);
     xhr.onreadystatechange = async () => {
       if (xhr.readyState == 4 && xhr.status != 304) {
         const lastModified = xhr.getResponseHeader("last-modified");
         const hash = await digestMessage(lastModified);
-        resolve(hash);
+        if (updatingList[url] !== hash) {
+          //TODO: bug with skip updating for iframes
+          setTimeout(() => {
+            updatingList[url] = hash;
+          }, 1000);
+          resolve(hash);
+        } else {
+          resolve();
+        }
       }
     };
     xhr.send();
@@ -28,7 +40,9 @@ function getFileHash(url) {
 async function setNewUrlToLinkNode(linkDOMnode) {
   const oldUrl = linkDOMnode.getAttribute("href");
   const newUrl = await getUrlWithNewhash(oldUrl, linkDOMnode);
-  linkDOMnode.setAttribute("href", newUrl);
+  if (newUrl) {
+    linkDOMnode.setAttribute("href", newUrl);
+  }
 }
 
 /**
@@ -41,6 +55,10 @@ async function getUrlWithNewhash(urlString, domNode) {
   const baseUrl = domNode.ownerDocument.baseURI;
   var newUrl = new URL(urlString, baseUrl);
   const hash = await getFileHash(newUrl);
+  if (!hash) {
+    return;
+  }
+
   newUrl.searchParams.set(searchHashPreffix, hash);
   return newUrl;
 }
@@ -60,14 +78,18 @@ async function setNewUrlToStyleNode(styleDOMnode) {
   cssString.replace(re, (match, g1) => {
     const replacePromise = new Promise(async (resolve, reject) => {
       const newUrl = await getUrlWithNewhash(g1, styleDOMnode);
-      newString = newString.replace(g1, newUrl);
+      if (newUrl) {
+        newString = newString.replace(g1, newUrl);
+      }
       resolve();
     });
     updatingLinks.push(replacePromise);
   });
 
   await Promise.all(updatingLinks);
-  styleDOMnode.innerHTML = newString;
+  if (styleDOMnode.innerHTML !== newString) {
+    styleDOMnode.innerHTML = newString;
+  }
 }
 
 /**
@@ -102,7 +124,9 @@ async function updateStyleForDocument(document) {
   const updatingOfLinks = linkList.map(setNewUrlToLinkNode);
 
   const styleNodeList = getStyleNodeListFromDocument(document);
-  const updatingOfStyleTags = styleNodeList.map(setNewUrlToStyleNode);
+  styleNodeList.map(setNewUrlToStyleNode);
+
+  const updatingOfStyleTags = [];
 
   await Promise.all([...updatingOfLinks, ...updatingOfStyleTags]);
 }
@@ -172,17 +196,12 @@ async function refreshStyle() {
   const documents = getAllDocumentsFromWindow(window);
   const updatingDocuments = documents.map(updateStyleForDocument);
   await Promise.all(updatingDocuments);
+  console.log("End Of Updating");
 }
-
-window.addEventListener("load", () => {
-  setTimeout(refreshStyle, 700);
-});
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponce) => {
   console.log("Background message listener:", request, sender, sendResponce);
   if (request.update) {
-    console.log("Start Of Updating");
-    await refreshStyle();
-    console.log("End Of Updating");
+    setInterval(refreshStyle, 700);
   }
 });
