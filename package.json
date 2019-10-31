@@ -4,6 +4,10 @@
     "lint-staged": "~9.4.2",
     "prettier": "~1.18.2"
   },
+  "main": "test-project/app.js",
+  "scripts": {
+    "dev": "node test-project/app.js"
+  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
