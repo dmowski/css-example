@@ -94,36 +94,12 @@ async function setNewUrlToStyleNode(styleDOMnode) {
 
 /**
  * @param {HTMLElement} document HTMLdocument
- * @return {Array.HTMLElement} NodeList: [<link rel="stylesheet" href="css/main.css">]
- */
-function getLinkNodeListFromDocument(document) {
-  return [...document.querySelectorAll("link[rel=stylesheet]")];
-}
-
-/**
- * @param {HTMLElement} document HTMLdocument
- * @return {Array.HTMLElement} NodeList: [<style >]
- */
-function getStyleNodeListFromDocument(document) {
-  return [...document.querySelectorAll("style")];
-}
-
-/**
- * @param {Object} window HTMLdocument
- * @return {Array.HTMLElement} NodeList: [<iframe >]
- */
-function getIframeNodeListFromDocument(win) {
-  return [...win.document.querySelectorAll("iframe")];
-}
-
-/**
- * @param {HTMLElement} document HTMLdocument
  */
 async function updateStyleForDocument(document) {
-  const linkList = getLinkNodeListFromDocument(document);
+  const linkList = [...document.querySelectorAll("link[rel=stylesheet]")];
   const updatingOfLinks = linkList.map(setNewUrlToLinkNode);
 
-  const styleNodeList = getStyleNodeListFromDocument(document);
+  const styleNodeList = [...document.querySelectorAll("style")];
   styleNodeList.map(setNewUrlToStyleNode);
 
   const updatingOfStyleTags = [];
@@ -136,7 +112,7 @@ async function updateStyleForDocument(document) {
  * @return {Array.HTMLElement} iframeList: [<iframe >]
  */
 function getIframesRecursive(win) {
-  let iframes = getIframeNodeListFromDocument(win);
+  let iframes = [...win.document.querySelectorAll("iframe")];
   iframes = iframes.filter(checkCorrectIframeDocument);
 
   let allChildIframes = [];
