@@ -5,27 +5,29 @@ html {
   margin: 0;
   padding: 0;
   width: 220px;
-  height: 100px;
+  height: 60px;
 }
 
-button {
+.action-button {
   background-color: #1565c0;
   display: block;
-  width: 81%;
+  width: 90%;
+  height: 80%;
   border: none;
   outline: none;
-  margin: 5% 10%;
-  position: fixed;
+  padding: 15px 0;
+  margin: 5%;
   box-shadow: 5px 5px 20px #c2c2c2;
   border-radius: 3px;
   text-transform: uppercase;
-  position: fixed;
-  top: 0;
-  bottom: 0;
   color: white;
   transition: box-shadow 50ms ease;
 }
 
-button:active {
+.action-button:active {
   box-shadow: 5px 5px 20px #c2c2c2, inset 1px 1px 10px black;
+}
+
+.action-button__second {
+  background-color: indigo;
 }
