@@ -141,7 +141,7 @@ function getIframesRecursive(win) {
 
   let allChildIframes = [];
   iframes.forEach(iframe => {
-    const childIframeWindow = getWindowFromIframe(iframe);
+    const childIframeWindow = iframe.contentWindow;
     const childIframesRecursive = getIframesRecursive(childIframeWindow);
     allChildIframes = [...allChildIframes, ...childIframesRecursive];
   });
@@ -156,14 +156,6 @@ function getIframesRecursive(win) {
 function checkCorrectIframeDocument(iframeNodeElement) {
   const doc = iframeNodeElement.contentDocument;
   return doc && doc.readyState === "complete";
-}
-
-/**
- * @param {HTMLElement} iframeNodeElement
- * @return {Object} window from iframe
- */
-function getWindowFromIframe(iframeNodeElement) {
-  return iframeNodeElement.contentWindow;
 }
 
 /**
