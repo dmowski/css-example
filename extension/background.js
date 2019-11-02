@@ -1,4 +1,6 @@
 const updatingList = {};
+const extensionPreffix = "__cssLiveReload__";
+const refresherProperty = extensionPreffix + "refresher";
 
 async function digestMessage(message) {
   const msgUint8 = new TextEncoder().encode(message); // encode as (utf-8) Uint8Array
@@ -153,8 +155,18 @@ async function refreshStyle() {
   await Promise.all(updatingDocuments);
 }
 
+function sendRefreshStatus() {
+  chrome.runtime.sendMessage({
+    watchStatus: !!window[refresherProperty],
+  });
+}
+
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponce) => {
-  if (request.update) {
-    setInterval(refreshStyle, 700);
+  if (request.watch === true) {
+    window[refresherProperty] = setInterval(refreshStyle, 700);
+  } else if (request.watch === false) {
+    clearInterval(window[refresherProperty]);
+    delete window[refresherProperty];
   }
+  sendRefreshStatus();
 });
