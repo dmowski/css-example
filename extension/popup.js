@@ -3,7 +3,6 @@
     update: true,
   };
   const refreshActionHandler = () => {
-    console.log("Popup send message", updateMessage);
     chrome.tabs.query(
       {
         active: true,

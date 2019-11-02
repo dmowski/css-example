@@ -147,19 +147,13 @@ function getAllDocumentsFromWindow(window) {
   return [window.document, ...childDocuments];
 }
 
-/**
- */
 async function refreshStyle() {
-  console.log("Start refreshStyle");
-
   const documents = getAllDocumentsFromWindow(window);
   const updatingDocuments = documents.map(updateStyleForDocument);
   await Promise.all(updatingDocuments);
-  console.log("End Of Updating");
 }
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponce) => {
-  console.log("Background message listener:", request, sender, sendResponce);
   if (request.update) {
     setInterval(refreshStyle, 700);
   }
