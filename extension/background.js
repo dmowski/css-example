@@ -154,16 +154,8 @@ function getIframesRecursive(win) {
  * @return {Boolean} true if document correct for work
  */
 function checkCorrectIframeDocument(iframeNodeElement) {
-  const doc = getDocumentFromIframe(iframeNodeElement);
+  const doc = iframeNodeElement.contentDocument;
   return doc && doc.readyState === "complete";
-}
-
-/**
- * @param {HTMLElement} iframeNodeElement
- * @return {HTMLElement} document from iframe
- */
-function getDocumentFromIframe(iframeNodeElement) {
-  return iframeNodeElement.contentDocument;
 }
 
 /**
@@ -180,10 +172,9 @@ function getWindowFromIframe(iframeNodeElement) {
  */
 function getAllDocumentsFromWindow(window) {
   const allChildIframes = getIframesRecursive(window);
-  const correctChildIframes = allChildIframes.filter(
-    checkCorrectIframeDocument
-  );
-  const childDocuments = correctChildIframes.map(getDocumentFromIframe);
+  const childDocuments = allChildIframes
+    .filter(checkCorrectIframeDocument)
+    .map(iframe => iframe.contentDocument);
 
   return [window.document, ...childDocuments];
 }
