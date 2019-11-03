@@ -16,30 +16,27 @@
       if (!sender.tab || sender.tab.active !== true) {
         return;
       }
-      const startWatchButton = document.getElementById("start-watch");
-      const stopWatchButton = document.getElementById("stop-watch");
+
+      const actionButton = document.querySelector(".action-button");
       if (request.watchStatus === true) {
-        startWatchButton.style.display = "none";
-        stopWatchButton.style.display = "block";
+        actionButton.innerText = "Stop live reload";
       } else {
-        startWatchButton.style.display = "block";
-        stopWatchButton.style.display = "none";
+        actionButton.innerText = "Run live reload";
       }
+
+      actionButton.classList.toggle(
+        "action-button__active",
+        request.watchStatus
+      );
     }
   );
 
   window.addEventListener("load", () => {
-    const startWatchButton = document.getElementById("start-watch");
-    startWatchButton.addEventListener("click", () => {
-      sendMessage({
-        watch: true,
-      });
-    });
+    const actionButton = document.querySelector(".action-button");
 
-    const stopWatchButton = document.getElementById("stop-watch");
-    stopWatchButton.addEventListener("click", () => {
+    actionButton.addEventListener("click", e => {
       sendMessage({
-        watch: false,
+        watch: !e.target.classList.contains("action-button__active"),
       });
     });
 

@@ -4,30 +4,48 @@ html {
   height: auto;
   margin: 0;
   padding: 0;
-  width: 220px;
+  width: 240px;
   height: 60px;
 }
 
 .action-button {
-  background-color: #1565c0;
   display: block;
-  width: 90%;
-  height: 80%;
+  width: 100%;
+  height: 100%;
   border: none;
   outline: none;
-  padding: 15px 0;
-  margin: 5%;
-  box-shadow: 5px 5px 20px #c2c2c2;
-  border-radius: 3px;
+  padding: 0;
+  margin: 0;
   text-transform: uppercase;
-  color: white;
-  transition: box-shadow 50ms ease;
+  cursor: pointer;
+  color: #222;
+  padding-left: 25px;
+  box-sizing: border-box;
+  background: linear-gradient(90deg, #f7f7f7, #f7f7f7);
+  transition: all 250ms ease;
 }
 
-.action-button:active {
-  box-shadow: 5px 5px 20px #c2c2c2, inset 1px 1px 10px black;
+.action-button:after {
+  content: "";
+  display: block;
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 20px;
+  width: 25px;
+  height: 25px;
+  margin: auto;
+  background-image: url("./images/reload.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 20px;
 }
 
-.action-button__second {
-  background-color: indigo;
+.action-button:not(.action-button__active):hover {
+  background-color: #e0e0e0;
+}
+
+.action-button__active {
+  background: linear-gradient(90deg, #f598a8, #f6edb2);
 }
