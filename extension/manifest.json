@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
-  "name": "Frame css reloader",
-  "description": "Frame css reloader",
+  "name": "CSS Live reload",
+  "description": "Refresh style on page without reload page",
   "version": "1.0.0",
   "icons": {
     "128": "images/reload.png"
