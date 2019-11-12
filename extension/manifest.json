@@ -10,7 +10,7 @@
     "default_icon": "images/reload.png",
     "default_popup": "popup.html"
   },
-  "permissions": ["activeTab", "tabs"],
+  "permissions": ["activeTab", "tabs", "storage"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
