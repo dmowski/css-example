@@ -158,6 +158,7 @@ async function refreshStyle() {
 function sendRefreshStatus() {
   chrome.runtime.sendMessage({
     watchStatus: !!window[refresherProperty],
+    url: window.location.origin,
   });
 }
 
