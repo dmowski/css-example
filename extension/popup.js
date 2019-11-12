@@ -11,8 +11,8 @@
     );
   };
 
-  const checkForUrl = function(url) {
-    const urlList = getUrlList();
+  const checkForUrl = async function(url) {
+    const urlList = await getUrlList();
     if (urlList.includes(url)) {
       sendMessage({
         watch: true,
@@ -20,30 +20,38 @@
     }
   };
 
-  const getUrlList = function() {
-    const stringFromStorage = localStorage.getItem("urlList");
-    return stringFromStorage ? JSON.parse(stringFromStorage) : [];
+  const getUrlList = async function() {
+    return new Promise(resolve => {
+      chrome.storage.sync.get("urlList", function(result) {
+        const urlList = result.urlList || [];
+        resolve(urlList);
+      });
+    });
   };
 
-  const saveUrlList = function(arrayOfUrl) {
-    const stringForSave = JSON.stringify(arrayOfUrl || []);
-    localStorage.setItem("urlList", stringForSave);
+  const saveUrlList = async function(arrayOfUrl) {
+    return new Promise(resolve => {
+      chrome.storage.sync.set({ urlList: arrayOfUrl }, function() {
+        console.log("Saved", arrayOfUrl);
+        resolve();
+      });
+    });
   };
 
-  const saveUrl = function(url) {
-    const urlList = getUrlList();
+  const saveUrl = async function(url) {
+    const urlList = await getUrlList();
     if (!urlList.includes(url)) {
       urlList.push(url);
     }
-    saveUrlList(urlList);
+    await saveUrlList(urlList);
   };
 
-  const removeUrl = function(url) {
-    const urlList = getUrlList();
+  const removeUrl = async function(url) {
+    const urlList = await getUrlList();
     if (urlList.includes(url)) {
       urlList = urlList.filter(urlFromStorage => urlFromStorage !== url);
     }
-    saveUrlList(urlList);
+    await saveUrlList(urlList);
   };
 
   chrome.runtime.onMessage.addListener(
@@ -56,10 +64,10 @@
       const actionButton = document.querySelector(".action-button");
       if (request.watchStatus === true) {
         actionButton.innerText = "Stop live reload";
-        saveUrl(request.url);
+        await saveUrl(request.url);
       } else {
         actionButton.innerText = "Run live reload";
-        checkForUrl(request.url);
+        await checkForUrl(request.url);
       }
 
       actionButton.classList.toggle(
@@ -72,10 +80,10 @@
   window.addEventListener("load", () => {
     const actionButton = document.querySelector(".action-button");
 
-    actionButton.addEventListener("click", e => {
+    actionButton.addEventListener("click", async e => {
       const runWatch = !e.target.classList.contains("action-button__active");
       if (!runWatch) {
-        removeUrl(window.lastUrl);
+        await removeUrl(window.lastUrl);
       }
       sendMessage({
         watch: runWatch,

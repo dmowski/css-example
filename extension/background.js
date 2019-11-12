@@ -163,11 +163,22 @@ function sendRefreshStatus() {
 }
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponce) => {
-  if (request.watch === true) {
+  toggleInterval(request.watch);
+});
+
+const toggleInterval = isRun => {
+  if (isRun === true) {
     window[refresherProperty] = setInterval(refreshStyle, 700);
-  } else if (request.watch === false) {
+  } else if (isRun === false) {
     clearInterval(window[refresherProperty]);
     delete window[refresherProperty];
   }
   sendRefreshStatus();
+};
+
+chrome.storage.sync.get("urlList", function(result) {
+  const urlList = result.urlList || [];
+  if (urlList.includes(window.location.origin)) {
+    toggleInterval(true);
+  }
 });
