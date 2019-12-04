@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "CSS Live reload",
   "description": "Refresh style on page without reload page",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "icons": {
     "16": "images/reload_16.png",
     "48": "images/reload_48.png",
