@@ -1,7 +1,15 @@
 const extensionPreffix = "__cssLiveReload__";
 const refresherProperty = extensionPreffix + "refresher";
+const cacheReqest = {};
 
-function getFileHash(url) {
+function getClearUrl(url) {
+  const urlObject = new URL(url);
+  urlObject.searchParams.delete("cssReloadHash");
+  urlObject.searchParams.delete("saltForGetHash");
+  return urlObject.toString();
+}
+
+function sendRequestForFileHash(url) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const urlWithSalt = new URL(url.toString());
@@ -16,6 +24,19 @@ function getFileHash(url) {
     };
     xhr.send();
   });
+}
+
+async function getFileHash(url) {
+  const clearUrl = getClearUrl(url);
+  if (cacheReqest[clearUrl]) {
+    return cacheReqest[clearUrl];
+  }
+
+  cacheReqest[clearUrl] = sendRequestForFileHash(url);
+  const hash = await cacheReqest[clearUrl];
+  cacheReqest[clearUrl] = null;
+
+  return hash;
 }
 
 /**
