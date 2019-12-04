@@ -1,4 +1,3 @@
-const updatingList = {};
 const extensionPreffix = "__cssLiveReload__";
 const refresherProperty = extensionPreffix + "refresher";
 
@@ -20,15 +19,7 @@ function getFileHash(url) {
       if (xhr.readyState == 4 && xhr.status != 304) {
         const lastModified = xhr.getResponseHeader("last-modified");
         const hash = await digestMessage(lastModified);
-        if (updatingList[url] !== hash) {
-          //TODO: bug with skip updating for iframes
-          setTimeout(() => {
-            updatingList[url] = hash;
-          }, 1000);
-          resolve(hash);
-        } else {
-          resolve();
-        }
+        resolve(hash);
       }
     };
     xhr.send();
@@ -42,7 +33,7 @@ function getFileHash(url) {
 async function setNewUrlToLinkNode(linkDOMnode) {
   const oldUrl = linkDOMnode.getAttribute("href");
   const newUrl = await getUrlWithNewhash(oldUrl, linkDOMnode);
-  if (newUrl) {
+  if (oldUrl !== newUrl) {
     linkDOMnode.setAttribute("href", newUrl);
   }
 }
@@ -57,12 +48,8 @@ async function getUrlWithNewhash(urlString, domNode) {
   const baseUrl = domNode.ownerDocument.baseURI;
   var newUrl = new URL(urlString, baseUrl);
   const hash = await getFileHash(newUrl);
-  if (!hash) {
-    return;
-  }
-
   newUrl.searchParams.set(searchHashPreffix, hash);
-  return newUrl;
+  return newUrl.toString();
 }
 
 /**
@@ -71,18 +58,14 @@ async function getUrlWithNewhash(urlString, domNode) {
  */
 async function setNewUrlToStyleNode(styleDOMnode) {
   const cssString = styleDOMnode.innerHTML;
-  // TODO: simpilfy regexp
-  const re = /(?:@import)\s(?:url\()?\s?["\'](.*?)["\']\s?\)?(?:[^;]*);?/gi;
+  const regForImport = /(?:@import)\s(?:url\()?\s?["\'](.*?)["\']\s?\)?(?:[^;]*);?/gi;
   let newString = cssString;
   const updatingLinks = [];
 
-  //TODO: check for copy of imports
-  cssString.replace(re, (match, g1) => {
+  cssString.replace(regForImport, (match, url) => {
     const replacePromise = new Promise(async (resolve, reject) => {
-      const newUrl = await getUrlWithNewhash(g1, styleDOMnode);
-      if (newUrl) {
-        newString = newString.replace(g1, newUrl);
-      }
+      const newUrl = await getUrlWithNewhash(url, styleDOMnode);
+      newString = newString.split(url).join(newUrl);
       resolve();
     });
     updatingLinks.push(replacePromise);
