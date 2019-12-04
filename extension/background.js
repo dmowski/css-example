@@ -37,7 +37,21 @@ async function setNewUrlToLinkNode(linkDOMnode) {
  */
 async function getUrlWithNewhash(urlString, domNode) {
   const searchHashPreffix = "cssReloadHash";
-  const baseUrl = domNode.ownerDocument.baseURI;
+
+  const doc = domNode.ownerDocument;
+  let baseUrl = doc.baseURI;
+  const baseDomNode = doc.querySelector("base");
+
+  if (baseDomNode) {
+    const isNodeBeforeBaseDomNode =
+      domNode.compareDocumentPosition(baseDomNode) &
+      Node.DOCUMENT_POSITION_FOLLOWING;
+
+    if (isNodeBeforeBaseDomNode) {
+      baseUrl = doc.location.toString();
+    }
+  }
+
   var newUrl = new URL(urlString, baseUrl);
   const hash = await getFileHash(newUrl);
   newUrl.searchParams.set(searchHashPreffix, hash);
