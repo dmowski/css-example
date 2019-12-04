@@ -155,30 +155,99 @@ async function refreshStyle() {
   await Promise.all(updatingDocuments);
 }
 
+const toggleInterval = isRun => {
+  if (isRun) {
+    window[refresherProperty] = setInterval(refreshStyle, 700);
+  } else {
+    clearInterval(window[refresherProperty]);
+    delete window[refresherProperty];
+  }
+};
+
+const isRunnedWatcher = () => {
+  return !!window[refresherProperty];
+};
+
+// -----------------
+
+const getUrlList = async function() {
+  return new Promise(resolve => {
+    chrome.storage.sync.get("urlList", function(result) {
+      const urlList = result.urlList || [];
+      resolve(urlList);
+    });
+  });
+};
+
+const getCurrentUrl = () => {
+  return window.location.origin;
+};
+
+const isUrlForWatcher = async () => {
+  const urlList = await getUrlList();
+  const currentUrl = getCurrentUrl();
+  return urlList.includes(currentUrl);
+};
+
+const saveUrlList = async function(arrayOfUrl) {
+  return new Promise(resolve => {
+    chrome.storage.sync.set({ urlList: arrayOfUrl }, function() {
+      resolve();
+    });
+  });
+};
+
+const removeUrl = async function() {
+  const currentUrl = getCurrentUrl();
+  const urlList = await getUrlList();
+
+  if (urlList.includes(currentUrl)) {
+    const newUrlList = urlList.filter(
+      urlFromStorage => urlFromStorage !== currentUrl
+    );
+    await saveUrlList(newUrlList);
+  }
+};
+
+const saveCurrentUrl = async function() {
+  const currentUrl = getCurrentUrl();
+  const urlList = await getUrlList();
+  if (!urlList.includes(currentUrl)) {
+    urlList.push(currentUrl);
+  }
+  await saveUrlList(urlList);
+};
+
+///------------------------
+
 function sendRefreshStatus() {
   chrome.runtime.sendMessage({
-    watchStatus: !!window[refresherProperty],
-    url: window.location.origin,
+    watchStatus: isRunnedWatcher(),
   });
 }
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponce) => {
-  toggleInterval(request.watch);
-});
-
-const toggleInterval = isRun => {
-  if (isRun === true) {
-    window[refresherProperty] = setInterval(refreshStyle, 700);
-  } else if (isRun === false) {
-    clearInterval(window[refresherProperty]);
-    delete window[refresherProperty];
-  }
-  sendRefreshStatus();
-};
-
-chrome.storage.sync.get("urlList", function(result) {
-  const urlList = result.urlList || [];
-  if (urlList.includes(window.location.origin)) {
+  if (request.watch === true) {
     toggleInterval(true);
+    saveCurrentUrl();
+  }
+
+  if (request.watch === false) {
+    toggleInterval(false);
+    removeUrl();
+  }
+
+  if (request.getInfo === true) {
+    sendRefreshStatus();
   }
 });
+
+///------------------------
+
+(async () => {
+  const isNeedRun = await isUrlForWatcher();
+  if (isNeedRun) {
+    toggleInterval(true);
+    sendRefreshStatus();
+  }
+})();
