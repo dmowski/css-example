@@ -8,6 +8,7 @@
   },
   "browser_action": {
     "default_icon": "images/reload.png",
+    "default_title": "CSS Live reload",
     "default_popup": "popup.html"
   },
   "permissions": ["activeTab", "tabs", "storage"],
