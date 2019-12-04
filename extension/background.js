@@ -132,7 +132,8 @@ async function refreshStyle() {
 
 const toggleInterval = isRun => {
   if (isRun) {
-    window[refresherProperty] = setInterval(refreshStyle, 700);
+    window[refresherProperty] =
+      window[refresherProperty] || setInterval(refreshStyle, 700);
   } else {
     clearInterval(window[refresherProperty]);
     delete window[refresherProperty];
