@@ -10,7 +10,8 @@
   },
   "browser_action": {
     "default_icon": "images/naz_128.png",
-    "default_title": "CSS Live reload"
+    "default_title": "CSS Live reload",
+    "name": "CSS Live reload"
   },
   "permissions": ["activeTab", "tabs", "storage"],
   "content_scripts": [
