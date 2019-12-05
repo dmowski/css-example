@@ -21,6 +21,6 @@
     }
   ],
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["updateIcon.js"]
   }
 }

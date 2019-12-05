@@ -248,6 +248,16 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponce) => {
     removeUrl();
   }
 
+  if (request.toggleState === true) {
+    const isNeedRun = !isRunnedWatcher();
+    toggleInterval(isNeedRun);
+    if (isNeedRun) {
+      saveCurrentUrl();
+    } else {
+      removeUrl();
+    }
+  }
+
   if (request.getInfo === true) {
     sendRefreshStatus();
   }
@@ -259,6 +269,6 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponce) => {
   const isNeedRun = await isUrlForWatcher();
   if (isNeedRun) {
     toggleInterval(true);
-    sendRefreshStatus();
   }
+  sendRefreshStatus();
 })();
