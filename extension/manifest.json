@@ -4,12 +4,12 @@
   "description": "Refresh style on page without reload page",
   "version": "1.0.1",
   "icons": {
-    "16": "images/reload_16.png",
-    "48": "images/reload_48.png",
-    "128": "images/reload_128.png"
+    "16": "images/naz_16.png",
+    "48": "images/naz_48.png",
+    "128": "images/naz_128.png"
   },
   "browser_action": {
-    "default_icon": "images/reload_128.png",
+    "default_icon": "images/naz_128.png",
     "default_title": "CSS Live reload",
     "default_popup": "popup.html"
   },
