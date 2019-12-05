@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "CSS Live reload",
   "description": "Refresh style on page without reload page",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "icons": {
     "16": "images/naz_16.png",
     "48": "images/naz_48.png",
@@ -13,10 +13,10 @@
     "default_title": "CSS Live reload",
     "name": "CSS Live reload"
   },
-  "permissions": ["tabs", "storage"],
+  "permissions": ["tabs", "storage", "http://*/*", "https://*/*"],
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": ["http://*/*", "https://*/*"],
       "js": ["background.js"]
     }
   ],
