@@ -1,23 +1,121 @@
-body {
-  color: white;
-  max-width: 70%;
-  margin: 0 auto;
+body,
+html {
+  margin: 0;
+  padding: 0;
   font-family: "Segoe UI", sans-serif;
-  padding: 0 0 100px 0;
 }
 
-h3 {
-  font-size: 42px;
-  margin-top: 80px;
+.start-page {
+  background-color: tomato;
+  background-position: center;
+  background-size: 100% 100%;
+  height: 100vh;
+  text-align: center;
 }
 
-p {
-  font-size: 16px;
-  padding: 10px 0;
+.start-page_bg {
+  min-width: 100vh;
+  min-height: 100vh;
 }
 
-iframe {
-  box-shadow: 0 0 20px tomato;
-  width: 100%;
-  height: 700px;
+.start-page__container {
+  flex-direction: column;
+  display: inline-flex;
+  height: 100%;
+  width: auto;
+  justify-content: center;
+  align-items: center;
+}
+
+.start-page__info {
+  text-transform: uppercase;
+  align-self: flex-end;
+  font-weight: 600;
+  font-size: 22px;
+  padding: 0;
+  margin: 0;
+  color: #fff;
+  display: inline;
+}
+
+.start-page__logo {
+  font-weight: 700;
+  display: inline;
+  font-size: 262px;
+  padding: 0;
+  margin: 0;
+  color: #fff;
+}
+.start-page__down {
+  color: white;
+  font-weight: 700;
+  font-size: 72px;
+}
+
+.start-page__menu {
+  display: flex;
+  align-self: flex-start;
+}
+
+.menu__item + .menu__item {
+  padding-left: 20px;
+}
+.menu__item:first-child {
+  padding-right: 20px;
+}
+.menu__item {
+  color: white;
+  font-size: 22px;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.content {
+  margin-top: 20px;
+}
+
+.image-block {
+  border: 1px solid black;
+  display: flex;
+  flex-direction: column;
+  height: 3800px;
+  flex-wrap: wrap;
+  xalign-items: center;
+  xjustify-content: center;
+}
+
+.image-block img {
+  border: 1px solid black;
+  width: 49.5%;
+  display: block;
+  xxflex-basis: 30%;
+}
+
+.about {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.about__title,
+.about__form {
+  flex-basis: 100%;
+}
+.about__info {
+  flex-basis: 50%;
+}
+
+.about__form {
+  display: flex;
+  border: 1px solid red;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.about input[type="text"] {
+  xmargin: 10px 0;
+  width: 700px;
+}
+
+.about input[type="button"] {
+  width: 100px;
 }
