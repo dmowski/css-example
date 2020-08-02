@@ -26,6 +26,19 @@ function sendRequestForFileHash(url) {
   });
 }
 
+function preloadFile(url) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", url, true);
+    xhr.onreadystatechange = async () => {
+      if (xhr.readyState == 4 && xhr.status != 304) {
+        resolve();
+      }
+    };
+    xhr.send();
+  });
+}
+
 async function getFileHash(url) {
   const clearUrl = getClearUrl(url);
   if (cacheReqest[clearUrl]) {
@@ -47,6 +60,7 @@ async function setNewUrlToLinkNode(linkDOMnode) {
   const oldUrl = linkDOMnode.getAttribute("href");
   const newUrl = await getUrlWithNewhash(oldUrl, linkDOMnode);
   if (oldUrl !== newUrl) {
+    await preloadFile(newUrl);
     linkDOMnode.setAttribute("href", newUrl);
   }
 }
@@ -92,6 +106,7 @@ async function setNewUrlToStyleNode(styleDOMnode) {
   cssString.replace(regForImport, (match, url) => {
     const replacePromise = new Promise(async (resolve, reject) => {
       const newUrl = await getUrlWithNewhash(url, styleDOMnode);
+      await preloadFile(newUrl);
       newString = newString.split(url).join(newUrl);
       resolve();
     });
