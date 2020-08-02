@@ -9,7 +9,24 @@ function getClearUrl(url) {
   return urlObject.toString();
 }
 
-function sendRequestForFileHash(url) {
+function sendRequestForFileHashWithoutSalt(url) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", url, true);
+    xhr.onreadystatechange = async () => {
+      if (xhr.readyState == 4 && xhr.status != 304) {
+        const lastModified = xhr.getResponseHeader("last-modified");
+        const hash = encodeURI(lastModified);
+        resolve(hash);
+      }
+    };
+    xhr.send();
+  });
+}
+
+async function sendRequestForFileHash(url) {
+  let hashWithoutLast = sendRequestForFileHashWithoutSalt(url);
+
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const urlWithSalt = new URL(url.toString());
@@ -19,7 +36,12 @@ function sendRequestForFileHash(url) {
       if (xhr.readyState == 4 && xhr.status != 304) {
         const lastModified = xhr.getResponseHeader("last-modified");
         const hash = encodeURI(lastModified);
-        resolve(hash);
+        hashWithoutLast = await hashWithoutLast;
+        if (hash === hashWithoutLast) {
+          resolve();
+        } else {
+          resolve(hash);
+        }
       }
     };
     xhr.send();
@@ -89,7 +111,11 @@ async function getUrlWithNewhash(urlString, domNode) {
 
   var newUrl = new URL(urlString, baseUrl);
   const hash = await getFileHash(newUrl);
-  newUrl.searchParams.set(searchHashPreffix, hash);
+  if (hash) {
+    newUrl.searchParams.set(searchHashPreffix, hash);
+  } else {
+    return urlString;
+  }
   return newUrl.toString();
 }
 
